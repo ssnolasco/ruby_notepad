@@ -1,10 +1,11 @@
 class ContactsController < ApplicationController
   before_action :set_contact, only: [:show, :edit, :update, :destroy]
+  before_action :set_options_for_select, only: [:new, :edit, :update, :create]
 
   # GET /contacts
   # GET /contacts.json
   def index
-    @contacts = Contact.all
+    @contacts = Contact.all.page(params[:page]).per(15)
   end
 
   # GET /contacts/1
@@ -15,12 +16,11 @@ class ContactsController < ApplicationController
   # GET /contacts/new
   def new
     @contact = Contact.new
-    options_for_select
+    @contact.build_address
   end
 
   # GET /contacts/1/edit
   def edit
-    options_for_select
   end
 
   # POST /contacts
@@ -64,7 +64,7 @@ class ContactsController < ApplicationController
   end
 
   private
-    def options_for_select
+    def set_options_for_select
       @kind_options_for_select = Kind.all
     end
     # Use callbacks to share common setup or constraints between actions.
@@ -74,6 +74,8 @@ class ContactsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def contact_params
-      params.require(:contact).permit(:name, :email, :kind_id, :rmk)
+      params.require(:contact).permit(:name, :email, :kind_id, :rmk,
+        address_attributes: [:street, :city, :state],
+        phones_attributes: [:id, :phone, :_destroy] )
     end
 end
